@@ -1,0 +1,5 @@
+.venv
+.vscode
+*input.txt
+*.out
+*__pycache__
