@@ -9,6 +9,8 @@ from utils import timed  # noqa
 
 
 class Node:
+    __slots__ = ["name", "weight", "childs", "sum", "childs_are_balanced"]
+
     def __init__(self, name: str, weight: int) -> None:
         self.name: str = name
         self.weight: int = weight
