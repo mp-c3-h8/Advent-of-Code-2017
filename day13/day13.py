@@ -3,6 +3,7 @@ import os
 import sys
 import re
 from math import prod, gcd
+from itertools import combinations
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(dir_path, '..', 'utils'))
@@ -32,36 +33,51 @@ def severity(firewall: Firewall) -> int:
 
 
 def min_delay(firewall: Firewall) -> int:
-    conds: dict[int, set[int]] = {}
-
+    # create dict of rules our solution x must satisfy
+    # x % div in mods   for every key-value-pair (div,mods)
+    div_to_mods: dict[int, set[int]] = {}
     for depth, rang in firewall:
-        mult = 2*(rang-1)
-        skip = (-depth % mult)
-        mods = set(j for j in range(mult) if j != skip)
-        if mult in conds:
-            conds[mult] = conds[mult].intersection(mods)
+        div = 2*(rang-1)
+        index_0 = (-depth % div)
+        mods = set(j for j in range(div) if j != index_0)
+        if div in div_to_mods:
+            # suppose we have
+            # x % 3 in {0,1}   and   x % 3 in {1,2}
+            # to satisfy both   x % 3 in {1}   must hold
+            div_to_mods[div].intersection_update(mods)
         else:
-            conds[mult] = mods
+            div_to_mods[div] = mods
 
     # simplify
-    conds = {key: conds[key] for key in sorted(conds, reverse=True)}
+    sorted_by_div: list[tuple[int, set[int]]] = sorted(div_to_mods.items())
+    n = len(sorted_by_div)
     coprimes, rems = [], []
-    for mult, mods in conds.items():
-        for other_mult in conds:
-            if mult > other_mult and mult % other_mult == 0:
-                mods.difference_update(m for m in mods.copy() if m % other_mult not in conds[other_mult])
 
-        # check if CRT is applicable
-        # mult is always even -> divide by 2
-        if len(mods) == 1:
-            n = mult // 2
-            if any(gcd(n, c) != 1 for c in coprimes):  # coprime check
-                continue
-            m, = mods  # hacky unpacking
-            if m % 2 == 1:
-                continue
-            coprimes.append(n)
-            rems.append(m//2)
+    for i, (div, mods) in enumerate(sorted_by_div):
+        for j in range(i):
+            other_div, other_mods = sorted_by_div[j]
+            # div > other_div by construction
+            if div % other_div == 0:
+                # mods and other_mods reference same sets in div_to_mods
+                mods.difference_update(m for m in mods.copy() if m % other_div not in other_mods)
+
+            # check if CRT is applicable
+            # div is always even -> divide by 2
+            if len(mods) == 1:
+                d = div // 2
+                if any(gcd(d, c) != 1 for c in coprimes):  # coprime check
+                    continue
+                m, = mods  # hacky unpacking
+                if m % 2 == 1:
+                    continue
+                coprimes.append(d)
+                rems.append(m//2)
+
+                del div_to_mods[div]
+
+    print(div_to_mods)
+    print(sorted_by_div)
+    print(coprimes)
 
     # apply CRT
     # bruteforce with stepsize of delay_mult
@@ -69,7 +85,7 @@ def min_delay(firewall: Firewall) -> int:
     delay = 2*find_min_x(coprimes, rems)  # times 2, cuz we divided by 2 earlier
     delay_mult = prod(coprimes)
     for _ in range(10**6):
-        if all((depth+delay) % (2*rang-2) != 0 for depth, rang in firewall):
+        if all(delay % mult in mods for mult, mods in div_to_mods.items()):
             break
         delay += delay_mult
     else:
