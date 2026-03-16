@@ -44,13 +44,11 @@ def create_grid(key: str) -> Grid:
         lengths = row_base + row_suffix + [17, 31, 73, 47, 23]
         marks = knotting(lengths, 64)
         dense_hash = [reduce(xor, batch) for batch in batched(marks, 16)]
-        for i, num in enumerate(dense_hash):
-            div, mod = divmod(num, 16)
-            binary_block = f"{div:04b}" + f"{mod:04b}"
-            for k, c in enumerate(binary_block):
-                if c == "1":
-                    x = i*8+k
-                    grid.add((y, x))
+        hex_string = "".join(f"{num:02x}" for num in dense_hash)
+        bin_string = f"{int(hex_string, 16):0128b}"
+        for x, c in enumerate(bin_string):
+            if c == "1":
+                grid.add((y, x))
     return grid
 
 
@@ -73,10 +71,11 @@ def connected_region_for_pos(grid: Grid, pos: Pos) -> set[Pos]:
 
 def num_connected_regions(grid: Grid) -> int:
     num = 0
-    while len(grid) != 0:
-        pos = grid.pop()
-        region = connected_region_for_pos(grid, pos)
-        grid.difference_update(region)
+    pool = grid.copy()
+    while len(pool) != 0:
+        pos = pool.pop()
+        region = connected_region_for_pos(pool, pos)
+        pool.difference_update(region)
         num += 1
     return num
 
