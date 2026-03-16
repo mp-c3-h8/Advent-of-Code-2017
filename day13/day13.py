@@ -3,7 +3,6 @@ import os
 import sys
 import re
 from math import prod, gcd
-from itertools import combinations
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(dir_path, '..', 'utils'))
@@ -50,9 +49,6 @@ def min_delay(firewall: Firewall) -> int:
 
     # simplify
     sorted_by_div: list[tuple[int, set[int]]] = sorted(div_to_mods.items())
-    n = len(sorted_by_div)
-    coprimes, rems = [], []
-
     for i, (div, mods) in enumerate(sorted_by_div):
         for j in range(i):
             other_div, other_mods = sorted_by_div[j]
@@ -61,31 +57,34 @@ def min_delay(firewall: Firewall) -> int:
                 # mods and other_mods reference same sets in div_to_mods
                 mods.difference_update(m for m in mods.copy() if m % other_div not in other_mods)
 
-            # check if CRT is applicable
-            # div is always even -> divide by 2
-            if len(mods) == 1:
-                d = div // 2
-                if any(gcd(d, c) != 1 for c in coprimes):  # coprime check
-                    continue
-                m, = mods  # hacky unpacking
-                if m % 2 == 1:
-                    continue
-                coprimes.append(d)
-                rems.append(m//2)
+    # check if CRT is applicable
+    # div is always even -> divide by 2
+    sorted_by_div.sort(reverse=True)  # bigger numbers first for a bigger delay_mult
+    coprimes, rems = [], []
+    for div, mods in sorted_by_div:
+        if len(mods) == 1:
+            d = div // 2
+            if any(gcd(d, c) != 1 for c in coprimes):  # coprime check
+                continue
+            m, = mods  # hacky unpacking
+            if m % 2 == 1:
+                continue
+            coprimes.append(d)
+            rems.append(m//2)
 
-                del div_to_mods[div]
-
-    print(div_to_mods)
-    print(sorted_by_div)
-    print(coprimes)
+            # this equation will be satisfied by CRT
+            del div_to_mods[div]
 
     # apply CRT
+    # this solves for x/2 (see aboive) -> multiply by 2
+    delay = 2*find_min_x(coprimes, rems)
+    delay_mult = 2*prod(coprimes)
+    
+
     # bruteforce with stepsize of delay_mult
     # defaults to delay=0, delay_mult=1 if CRT fails
-    delay = 2*find_min_x(coprimes, rems)  # times 2, cuz we divided by 2 earlier
-    delay_mult = prod(coprimes)
     for _ in range(10**6):
-        if all(delay % mult in mods for mult, mods in div_to_mods.items()):
+        if all(delay % div in mods for div, mods in div_to_mods.items()):
             break
         delay += delay_mult
     else:
