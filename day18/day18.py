@@ -78,16 +78,15 @@ def part2(instr: list[Instruction]) -> int:
 
     for _ in range(10**6):
         prog_0.run()
+        prog_1.input.extend(prog_0.output)
+        prog_0.output.clear()
+
         prog_1.run()
-
-        if len(prog_0.output) == 0 and len(prog_1.output) == 0:
+        if len(prog_1.output) == 0:
             return res
-
         res += len(prog_1.output)
         prog_0.input.extend(prog_1.output)
-        prog_1.input.extend(prog_0.output)
-        prog_0.output = []
-        prog_1.output = []
+        prog_1.output.clear()
     else:
         raise ValueError("Max iterations reached.")
 
