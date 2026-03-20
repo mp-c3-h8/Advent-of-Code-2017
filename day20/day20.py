@@ -51,7 +51,7 @@ def long_run(particles: list[Particle]) -> int:
 
 
 # inputs are scalar!
-# we only allow positive integer solutions
+# we only allow non-negative integer solutions
 def solve_for_t(dp: int, dv: int, da: int) -> list[int] | None:
     # abc formula
     a = da
@@ -101,6 +101,10 @@ def solve_for_t(dp: int, dv: int, da: int) -> list[int] | None:
             continue
 
         sols.append(sol)
+
+    if len(sols) == 0:
+        # no non-negative integer solution
+        return None
 
     sols.sort()
     return sols
