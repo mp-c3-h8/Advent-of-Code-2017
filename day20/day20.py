@@ -123,7 +123,6 @@ def collisions(particles: list[Particle]) -> int:
         da = (a1[0]-a2[0], a1[1]-a2[1], a1[2]-a2[2])
 
         for i in range(3):
-            found = False
             sols = solve_for_t(dp[i], dv[i], da[i])
             if sols is None:
                 break
@@ -133,10 +132,8 @@ def collisions(particles: list[Particle]) -> int:
                 for t in sols:
                     if particle_pos_at_tick(par1, t) == particle_pos_at_tick(par2, t):
                         colls[t].update((par1, par2))
-                        found = True
                         break
-            if found:
-                break
+            break
 
     colliders_list: list[set[Particle]] = [colls[k] for k in sorted(colls.keys())]
     seen: set[Particle] = set()
