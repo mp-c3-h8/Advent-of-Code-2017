@@ -108,11 +108,7 @@ def solve_for_t(dp: int, dv: int, da: int) -> list[int] | None:
 
 def particle_pos_at_tick(par: Particle, t: int) -> Pos:
     p, v, a = par
-    pos = [0]*3
-    for i in range(3):
-        pos[i] = p[i] + t*v[i] + t*(t+1)//2 * a[i]
-
-    return (pos[0], pos[1], pos[2])
+    return tuple(p[i] + t*v[i] + t*(t+1)//2 * a[i] for i in range(3))  # type: ignore
 
 
 def collisions(particles: list[Particle]) -> int:
