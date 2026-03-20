@@ -89,9 +89,6 @@ def solve_for_t(dp: int, dv: int, da: int) -> list[int] | None:
     if sq*sq != radical:
         return None
 
-    s1 = (-b + sq) / (2*a)
-    s2 = (-b - sq) / (2*a)
-
     sols: list[int] = []
     for pari in (1, -1):
         nom = -b + pari*sq
@@ -129,26 +126,21 @@ def collisions(particles: list[Particle]) -> int:
         dv = (v1[0]-v2[0], v1[1]-v2[1], v1[2]-v2[2])
         da = (a1[0]-a2[0], a1[1]-a2[1], a1[2]-a2[2])
 
-        all_sols = []
         for i in range(3):
+            found = False
             sols = solve_for_t(dp[i], dv[i], da[i])
             if sols is None:
                 break
             elif len(sols) == 0:  # solution exists for every t
                 continue
             else:
-                all_sols.append(sols)
-        else:
-            # didnt break, we might have a common solution
-            if len(all_sols) == 0:
-                # par1 == par2
-                raise ValueError(f"Identical particles detected: {par1}")
-
-            common = set.intersection(*map(set, all_sols))
-            if len(common) > 0:
-                sort = sorted(common)
-                sol = sort[0]
-                colls[sol].update((par1, par2))
+                for t in sols:
+                    if particle_pos_at_tick(par1, t) == particle_pos_at_tick(par2, t):
+                        colls[t].update((par1, par2))
+                        found = True
+                        break
+            if found:
+                break
 
     colliders_list: list[set[Particle]] = [colls[k] for k in sorted(colls.keys())]
     seen: set[Particle] = set()
