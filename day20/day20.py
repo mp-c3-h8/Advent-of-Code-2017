@@ -138,6 +138,10 @@ def collisions(particles: list[Particle]) -> int:
                         colls[t].update((par1, par2))
                         break
             break
+        else:
+            # par1 == par2
+            assert par1 == par2
+            raise ValueError(f"Identical particles detected: {par1}")
 
     colliders_list: list[set[Particle]] = [colls[k] for k in sorted(colls.keys())]
     seen: set[Particle] = set()
