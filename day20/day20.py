@@ -58,18 +58,38 @@ def solve_for_t(dp: int, dv: int, da: int) -> list[int] | None:
     b = da + 2*dv
     c = 2*dp
 
-    if a == b == 0:
-        if c == 0:
-            # da = dv = dp = 0   =>  identical
-            # collision for every t
-            return []
-        else:
-            # c != 0   =>  no solution
+    if a != 0:
+        radical = b*b - 4*a*c
+        if radical < 0:
             return None
 
-    if a == 0:
+        # isqrt is used here
+        sq = isqrt(radical)
+        if sq*sq != radical:
+            return None
+
+        sols: list[int] = []
+        for pari in (1, -1):
+            nom = -b + pari*sq
+            den = 2*a
+            if nom % den != 0:
+                continue
+
+            sol = nom//den
+            if sol < 0:
+                continue
+
+            sols.append(sol)
+
+        if len(sols) == 0:
+            # no non-negative integer solution
+            return None
+
+        sols.sort()
+        return sols
+
+    elif b != 0:
         # b*x + c = 0
-        # b!=0
         if -c % b != 0:
             return None
         sol = -c//b
@@ -77,37 +97,13 @@ def solve_for_t(dp: int, dv: int, da: int) -> list[int] | None:
             return None
         return [sol]
 
-    radical = b*b - 4*a*c
-
-    # negative radical
-    if radical < 0:
+    elif c != 0:
+        # eq: c = 0
         return None
-
-    # isqrt is used here
-    sq = isqrt(radical)
-
-    if sq*sq != radical:
-        return None
-
-    sols: list[int] = []
-    for pari in (1, -1):
-        nom = -b + pari*sq
-        den = 2*a
-        if nom % den != 0:
-            continue
-
-        sol = nom//den
-        if sol < 0:
-            continue
-
-        sols.append(sol)
-
-    if len(sols) == 0:
-        # no non-negative integer solution
-        return None
-
-    sols.sort()
-    return sols
+    else:
+        # da = dv = dp = 0   =>  identical
+        # collision for every t
+        return []
 
 
 def particle_pos_at_tick(par: Particle, t: int) -> Pos:
