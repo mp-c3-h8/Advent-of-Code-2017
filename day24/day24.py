@@ -55,11 +55,11 @@ def strongest_bridge(components: list[Component]) -> tuple[int, int]:
     seen: set[State] = set()
 
     while q:
-        strength, length, state = q.popleft()
+        strength, length, state = q.pop()
         port, bridge, ext_used = state
 
-        avail = port_to_component[port].difference(bridge)
-        n = len(avail)
+        candidates = port_to_component[port].difference(bridge)
+        n = len(candidates)
 
         if n == 0:
             best_strength = max(best_strength, strength)
@@ -70,13 +70,12 @@ def strongest_bridge(components: list[Component]) -> tuple[int, int]:
                 best_length_strength = max(best_length_strength, strength)
             continue
 
-        for _ in range(n):
-            comp = avail.pop()
-            p1, p2 = comp.ports
+        for new_comp in candidates:
+            p1, p2 = new_comp.ports
             new_strength = strength + p1 + p2
             new_length = length + 1
             new_port = p1 if port == p2 else p2
-            new_bridge = bridge | {comp}
+            new_bridge = bridge | {new_comp}
             new_ext_used = ext_used
 
             # connect extensions immediately
