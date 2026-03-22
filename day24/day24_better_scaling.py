@@ -44,7 +44,6 @@ def strongest_bridge(components: list[Component]) -> tuple[int, int]:
         port_to_component[high].add(comp)
         component_count[comp] += 1
 
-    # State = (port,bridge,ext_used)
     # bridge doesnt include extensions
     # use (0,0) extensions
     ext_init = frozenset({0})

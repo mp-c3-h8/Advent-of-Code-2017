@@ -30,15 +30,15 @@ def create_components(data: str) -> list[Component]:
 
 
 def strongest_bridge(components: list[Component]) -> tuple[int, int]:
-    pool: defaultdict[int, set[Component]] = defaultdict(set)
+    port_to_component: defaultdict[int, set[Component]] = defaultdict(set)
     extensions: Counter[Port] = Counter()
     for comp in components:
         p1, p2 = comp.ports
         if p1 == p2:
             extensions[p1] += 1
         else:
-            pool[p1].add(comp)
-            pool[p2].add(comp)
+            port_to_component[p1].add(comp)
+            port_to_component[p2].add(comp)
 
     # State = (port,bridge,ext_used)
     # bridge doesnt include extensions
@@ -54,13 +54,11 @@ def strongest_bridge(components: list[Component]) -> tuple[int, int]:
 
     seen: set[State] = set()
 
-    i = 0
     while q:
-        i += 1
         strength, length, state = q.popleft()
         port, bridge, ext_used = state
 
-        avail = pool[port].difference(bridge)
+        avail = port_to_component[port].difference(bridge)
         n = len(avail)
 
         if n == 0:
@@ -94,8 +92,6 @@ def strongest_bridge(components: list[Component]) -> tuple[int, int]:
             seen.add(new_state)
 
             q.append((new_strength, new_length, new_state))
-
-    print(i)
 
     return best_strength, best_length_strength
 
