@@ -48,8 +48,8 @@ def enhance(source: Image, rules: Rules) -> Image:
         for i in range(div):
             block_row = []
             for j in range(div):
-                row1 = (source[2*i][2*j], source[2*i][2*j+1])
-                row2 = (source[2*i+1][2*j], source[2*i+1][2*j+1])
+                row1 = tuple(source[2*i][2*j:2*j+2])
+                row2 = tuple(source[2*i+1][2*j:2*j+2])
                 key = (row1, row2)
                 block_row.append(rules[key])
             blocks.append(block_row)
@@ -58,9 +58,9 @@ def enhance(source: Image, rules: Rules) -> Image:
         for i in range(div):
             block_row = []
             for j in range(div):
-                row1 = (source[3*i][3*j], source[3*i][3*j+1], source[3*i][3*j+2])
-                row2 = (source[3*i+1][3*j], source[3*i+1][3*j+1], source[3*i+1][3*j+2])
-                row3 = (source[3*i+2][3*j], source[3*i+2][3*j+1], source[3*i+2][3*j+2])
+                row1 = tuple(source[3*i][3*j:3*j+3])
+                row2 = tuple(source[3*i+1][3*j:3*j+3])
+                row3 = tuple(source[3*i+2][3*j:3*j+3])
                 key = (row1, row2, row3)
                 block_row.append(rules[key])
             blocks.append(block_row)
