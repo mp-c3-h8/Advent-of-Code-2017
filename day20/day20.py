@@ -29,7 +29,7 @@ def create_particles(data: str) -> list[Particle]:
 
 
 def man(x: Vec3) -> int:
-    return abs(x[0]) + abs(x[1]) + abs(x[2])
+    return sum(map(abs, x))
 
 
 # t > 0  =  tick
