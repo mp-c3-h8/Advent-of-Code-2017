@@ -6,9 +6,11 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(dir_path, '..', 'utils'))
 from utils import timed  # noqa
 
-type Row = tuple[str, ...]
-type Image = tuple[Row, ...]
-type Rules = dict[Image, Image]
+type KeyRow = tuple[str, ...]
+type KeyImage = tuple[KeyRow, ...]
+type Row = list[str]
+type Image = list[Row]
+type Rules = dict[KeyImage, Image]
 
 
 def create_rules(data: str) -> Rules:
@@ -16,7 +18,7 @@ def create_rules(data: str) -> Rules:
     for line in data.splitlines():
         source, target = line.split(" => ", 2)
         image_source = tuple(map(tuple, source.split("/")))
-        image_target = tuple(map(tuple, target.split("/")))
+        image_target = list(map(list, target.split("/")))
 
         # flip
         flipped = tuple(image_source[::-1])
@@ -38,7 +40,7 @@ def create_rules(data: str) -> Rules:
 def enhance(source: Image, rules: Rules) -> Image:
     size = len(source)
     if size <= 3:
-        return rules[source]
+        return rules[tuple(tuple(row) for row in source)]
 
     blocks = []
     if size % 2 == 0:
@@ -64,11 +66,11 @@ def enhance(source: Image, rules: Rules) -> Image:
             blocks.append(block_row)
 
     # reshape
-    new_image = tuple()
+    new_image = []
     for block_row in blocks:
-        for row_as_tuples in zip(*block_row):
-            new_row = sum(row_as_tuples, ())
-            new_image += (new_row,)
+        for row_as_lists in zip(*block_row):
+            new_row = sum(row_as_lists, [])
+            new_image.append(new_row)
 
     return new_image
 
@@ -88,7 +90,7 @@ def main() -> None:
     P1_ITER = 5
     P2_ITER = 18
 
-    image = (tuple(".#."), tuple("..#"), tuple("###"))
+    image = [list(".#."), list("..#"), list("###")]
 
     for _ in range(P1_ITER):
         image = enhance(image, RULES)
