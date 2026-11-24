@@ -50,8 +50,8 @@ def enhance(source: Image, rules: Rules) -> Image:
             for j in range(div):
                 row1 = (source[2*i][2*j], source[2*i][2*j+1])
                 row2 = (source[2*i+1][2*j], source[2*i+1][2*j+1])
-                lookup = (row1, row2)
-                block_row.append(rules[lookup])
+                key = (row1, row2)
+                block_row.append(rules[key])
             blocks.append(block_row)
     else:
         div = size // 3
@@ -61,8 +61,8 @@ def enhance(source: Image, rules: Rules) -> Image:
                 row1 = (source[3*i][3*j], source[3*i][3*j+1], source[3*i][3*j+2])
                 row2 = (source[3*i+1][3*j], source[3*i+1][3*j+1], source[3*i+1][3*j+2])
                 row3 = (source[3*i+2][3*j], source[3*i+2][3*j+1], source[3*i+2][3*j+2])
-                lookup = (row1, row2, row3)
-                block_row.append(rules[lookup])
+                key = (row1, row2, row3)
+                block_row.append(rules[key])
             blocks.append(block_row)
 
     # reshape
@@ -76,9 +76,14 @@ def enhance(source: Image, rules: Rules) -> Image:
 
 
 def count_on(image: Image) -> int:
-    res = sum(c == "#" for row in image for c in row)
+    res = sum("".join(row).count("#") for row in image)
     return res
 
+
+# improvements:
+# - 3x3 turns into 3x3 of 3x3's after 3 iterations ( 9x9 matrix )
+# - iterate them independently
+# - use indices for every 2x2 and 3x3 and dont work with grids
 
 @timed("All")
 def main() -> None:
